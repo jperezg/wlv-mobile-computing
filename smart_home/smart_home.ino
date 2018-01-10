@@ -46,6 +46,7 @@ void setup() {
 
   // Device 2 - Outdoors setup
   outdoorsLight.setup(EXTERIOR_LIGHT_LED);
+  outdoorsLight.setAuto(true);
   simpleLightButton.setup(INTERIOR_LIGHT_BUTTON);
   gate.setup(SERVO_PIN);
 
@@ -68,12 +69,18 @@ void loop() {
 }
 
 void checkOutdoorsLights() {
-  if (analogRead(PHOTORESISTOR_PIN) <= 100) {
-    outdoorsLight.turnOn();
-    zigBee.print("exterior_light:on");
-  } else {
-    outdoorsLight.turnOff();
-    zigBee.print("exterior_light:off");
+  if (outdoorsLight.isAuto()) {
+    if (analogRead(PHOTORESISTOR_PIN) <= 100) {
+      if (!outdoorsLight.isOn()) {
+        outdoorsLight.turnOn();
+        zigBee.println("exterior_light:on");
+      }
+    } else {
+      if (outdoorsLight.isOn()) {
+        outdoorsLight.turnOff();
+        zigBee.println("exterior_light:off");
+      }
+    }
   }
 }
 
@@ -94,12 +101,12 @@ void checkAlarm() {
 
   if (alarmButton.isPressed()) {
     alarm.set(false);
-    zigBee.print("alarm:off");
+    zigBee.println("alarm:off");
   }
 
   if (fireDetector.check() != NO_FIRE) {
-    zigBee.print("alarm:on");
     alarm.set(true);
+    zigBee.println("alarm:on");
   }
 }
 
@@ -132,7 +139,12 @@ int handleCommands() {
         handleCommandSimpleLight(simpleLight, action);
         break;
       case CommandExteriorLight:
-        handleCommandSimpleLight(simpleLight, action);
+        if (action == "on") {
+          outdoorsLight.setAuto(false);
+        } else {
+          outdoorsLight.setAuto(true);
+        }
+        handleCommandSimpleLight(outdoorsLight, action);
         break;
       case CommandAnalogLight:
         handleCommandAnalogLight(action);
@@ -145,7 +157,7 @@ int handleCommands() {
         break;
     }
 
-    zigBee.println(command + ":" + action);
+    zigBee.println(component + ":" + action);
 
     delay(10);
     return 1;
