@@ -18,12 +18,13 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 SoftwareSerial zigBee(XBEE_RX_PIN, XBEE_TX_PIN);
 Button alarmButton, doorButton, digitalLightButton, analogLightButton;
 
-String screen[] = { "DO | IL | AN | AL", "   |   |   |    "};
+String screen[] = { "D | I | I | A |O", "  |   |   |   | "};
 
 int alarmState = 0;
 int doorState = 0;
 int digitalLightState = 0;
 int analogLightState = 0;
+int outdoorsLightState = 0;
 
 void setup() {
 
@@ -54,9 +55,8 @@ void showDisplay(int row) {
 
 void showStates() {
   char buffer[20];
-  sprintf(buffer, "%d  |%d  |%d  |%d   ", doorState, digitalLightState, analogLightState, alarmState);
+  sprintf(buffer, "%d | %d | %d | %d |%d", doorState, digitalLightState, analogLightState, alarmState, outdoorsLightState);
   screen[1] = (String) buffer;
-  Serial.println(screen[1]);
   showDisplay(1);
 }
 
@@ -68,29 +68,36 @@ void printInLCD(String s, int row) {
 void handleControls() {
   if (digitalLightButton.isPressed()) {
     if (digitalLightState) {
+      Serial.println("sending interior_light:off");
       zigBee.println("interior_light:off");
     } else {
+      Serial.println("sending interior_light:on");
       zigBee.println("interior_light:on");
     }
   } else if (alarmButton.isPressed()) {
     if (alarmState) {
+      Serial.println("sending alarm:off");
       zigBee.println("alarm:off");
     } else {
-      // zigBee.println("alarm:on");
+      Serial.println("sending alarm:on");
+      zigBee.println("alarm:on");
     }
   } else if (doorButton.isPressed()) {
     if (doorState) {
+      Serial.println("sending gate:close");
       zigBee.println("gate:close");
     } else {
+      Serial.println("sending gate:open");
       zigBee.println("gate:open");
     }
   }
 
-  // int val = analogRead(POTENTIOMETER_PIN) - 34;
+  // int val = analogRead(POTENTIOMETER_PIN);
   // // int lightValue = (255 * val)/10;
+  // int lightValue = val;
   // if (lightValue != lastPotentiometerValue) {
-  //   // zigBee.println("analog_light:" + lightValue);
-  //
+  //   Serial.println("sending analog_light:" + lightValue);
+  //   zigBee.println("analog_light:" + lightValue);
   //   lastPotentiometerValue = lightValue;
   // }
   delay(100);
@@ -110,9 +117,9 @@ void checkCommands() {
     String component = rawString.substring(0, pos);
     String action = rawString.substring(pos + 1);
 
-    Serial.println(component);
-    Serial.println(action);
-    Serial.println("---");
+    // Serial.println(component);
+    // Serial.println(action);
+    // Serial.println("---");
 
     if (component == "interior_light") {
       digitalLightState = action == "on" ? 1 : 0;
@@ -126,6 +133,11 @@ void checkCommands() {
 
     if (component == "gate") {
       doorState = action == "open" ? 1 : 0;
+      hasChanged = true;
+    }
+
+    if (component == "exterior_light") {
+      outdoorsLightState = action == "on" ? 1 : 0;
       hasChanged = true;
     }
 

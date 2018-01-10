@@ -5,8 +5,8 @@
 #include "Arduino.h"
 #include <Servo.h>
 
-#define GATE_OPEN_ANGLE 60
-#define GATE_CLOSE_ANGLE 60
+#define GATE_OPEN_ANGLE 180
+#define GATE_CLOSE_ANGLE 90
 #define GATE_DIFF 10
 
 class Gate {

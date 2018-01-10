@@ -52,6 +52,7 @@ void setup() {
 
   // Device 3 - Indoors setup
   simpleLight.setup(INTERIOR_LIGHT_LED1);
+  simpleLight.setAuto(true);
   analogLight.setup(INTERIOR_LIGHT_ANALOG);
 
   // Device 4 - Alarm setup
@@ -85,11 +86,19 @@ void checkOutdoorsLights() {
 }
 
 void checkIndoorsLights() {
-  // if (simpleLightButton.getState()) {
-  //   simpleLight.turnOn();
-  // } else {
-  //   simpleLight.turnOff();
-  // }
+  if (simpleLight.isAuto()) {
+    if (simpleLightButton.getState()) {
+      if (!simpleLight.isOn()) {
+        simpleLight.turnOn();
+        zigBee.println("interior_light:on");
+      }
+    } else {
+      if (simpleLight.isOn()) {
+        simpleLight.turnOff();
+        zigBee.println("interior_light:off");
+      }
+    }
+  }
 
   // int lightValue = (255 * analogRead(INTERIOR_LIGHT_POT))/1023;
   // analogLight.setValue(lightValue);
@@ -139,11 +148,6 @@ int handleCommands() {
         handleCommandSimpleLight(simpleLight, action);
         break;
       case CommandExteriorLight:
-        if (action == "on") {
-          outdoorsLight.setAuto(false);
-        } else {
-          outdoorsLight.setAuto(true);
-        }
         handleCommandSimpleLight(outdoorsLight, action);
         break;
       case CommandAnalogLight:
@@ -174,12 +178,14 @@ Command getCommand(String str) {
 }
 
 void handleCommandSimpleLight(SimpleLight light, String action) {
-  Serial.println("Light -> " + action + "\n");
   if (action == "on") {
+    light.setAuto(false);
     light.turnOn();
   } else {
+    light.setAuto(true);
     light.turnOff();
   }
+  delay(200);
 }
 
 void handleCommandAnalogLight(String action) {
@@ -198,7 +204,9 @@ void handleCommandGate(String action) {
   Serial.print("Gate "+action+ "\n");
   if (action == "open") {
     gate.open();
+    zigBee.println("gate:open");
   } else {
     gate.close();
+    zigBee.println("gate:close");
   }
 }

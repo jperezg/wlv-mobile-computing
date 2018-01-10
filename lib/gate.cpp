@@ -11,15 +11,9 @@ void Gate::setup(int pin) {
 }
 
 void Gate::open() {
-  for(int i = _position; i <= GATE_OPEN_ANGLE; i += GATE_DIFF) {
-    _servoGate.write(i);
-    delay(200);
-  }
+  _servoGate.write(GATE_OPEN_ANGLE);
 }
 
 void Gate::close() {
-  for(int i = _position; i <= GATE_CLOSE_ANGLE; i += GATE_DIFF) {
-    _servoGate.write(i);
-    delay(200);
-  }
+  _servoGate.write(GATE_CLOSE_ANGLE);
 }
