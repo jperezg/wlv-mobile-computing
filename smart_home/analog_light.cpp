@@ -1,4 +1,3 @@
-// #include "Arduino.h"
 #include "analog_light.h"
 
 AnalogLight::AnalogLight() {
