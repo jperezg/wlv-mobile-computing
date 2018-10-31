@@ -100,9 +100,10 @@ void checkIndoorsLights() {
     }
   }
 
+  int sensorValue = analogRead(INTERIOR_LIGHT_POT);
   // int lightValue = (255 * analogRead(INTERIOR_LIGHT_POT))/1023;
-  // analogLight.setValue(lightValue);
-  // Serial.println(lightValue);
+  int lightValue = map(sensorValue, 0, 1023, 0, 255);
+  analogLight.setValue(lightValue);
 }
 
 void checkAlarm() {

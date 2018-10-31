@@ -1,4 +1,3 @@
-// #include "Arduino.h"
 #include "toggle_button.h"
 
 ToggleButton::ToggleButton() {

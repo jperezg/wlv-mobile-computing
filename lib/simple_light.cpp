@@ -1,4 +1,3 @@
-// #include "Arduino.h"
 #include "simple_light.h"
 
 SimpleLight::SimpleLight() {
